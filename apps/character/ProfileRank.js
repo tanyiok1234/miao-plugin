@@ -81,6 +81,43 @@ export async function resetRank (e) {
   e.reply(`本群${charName}排名已重置...`)
 }
 
+/**
+ * 刷新群排名信息
+ * @param e
+ * @returns {Promise<boolean>}
+ */
+export async function refreshRank (e) {
+  let groupId = e.group_id
+  if (!groupId) {
+    return true
+  }
+  if (!e.isMaster) {
+    e.reply('只有管理员可刷新排名...')
+    return true
+  }
+  let groupUids = await Common.getGroupUids(e)
+  let count = 0
+  for (let qq in groupUids) {
+    for (let { uid, type } of groupUids[qq]) {
+      let profiles = Profile.getAll(uid)
+      // 刷新rankLimit
+      await ProfileRank.setUidInfo({ uid, profiles, qq, uidType: type })
+      let rank = await ProfileRank.create({ groupId, uid, qq })
+      for (let id in profiles) {
+        let profile = profiles[id]
+        if (!profile.hasData) {
+          continue
+        }
+        await rank.getRank(profile, true)
+      }
+      if (rank.allowRank) {
+        count++
+      }
+    }
+  }
+  e.reply(`本群排名已刷新，共刷新${count}个UID数据...`)
+}
+
 async function renderCharRankList ({ e, uids, char, mode, groupId }) {
   let list = []
 
@@ -108,6 +145,16 @@ async function renderCharRankList ({ e, uids, char, mode, groupId }) {
         tmp.dmg = {
           title: title,
           avg: Format.comma(dmg.avg, 1)
+        }
+      }
+      if (uid) {
+        let userInfo = await ProfileRank.getUidInfo(uid)
+        if (userInfo && userInfo.qq) {
+          let member = e.group?.pickMember(userInfo.qq * 1)
+          let img = member?.getAvatarUrl(140)
+          if (img) {
+            tmp.qqFace = img
+          }
         }
       }
       list.push(tmp)
