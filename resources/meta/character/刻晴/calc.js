@@ -3,7 +3,7 @@ export const details = [{
   dmg: ({ talent }, dmg) => dmg(talent.a['一段伤害']+talent.a['重击伤害'], 'a2')
 },{
   title: 'E后A重激化伤害',
-  dmg: ({ talent }, dmg) => dmg(talent.a['一段伤害']+talent.a['重击伤害'], 'a2', 'aggravate')
+  dmg: ({ talent }, dmg) => dmg(talent.a['一段伤害']+talent.a['重击伤害'], 'a2', '超激化')
 },{
   title: 'Q单段伤害',
   params: { q: 1 },
@@ -11,7 +11,7 @@ export const details = [{
 }, {
   title: 'Q超激化单段伤害',
   params: { q: 1 },
-  dmg: ({ talent }, dmg) => dmg(talent.q['连斩伤害2'][0], 'q', 'aggravate')
+  dmg: ({ talent }, dmg) => dmg(talent.q['连斩伤害2'][0], 'q', '超激化')
 }, {
   title: 'Q总伤害',
   params: { q: 1 },
