@@ -96,6 +96,10 @@ export default class ProfileData extends Base {
       10000022, // 温迪
       10000030, // 钟离
       10000052, // 雷神
+      10000046, // 胡某人
+      10000042, // 晴宝
+      10000035, // 七七
+      10000002, //0华
       10000073 // 纳西妲
     ]
     let talent = this.talent ? lodash.map(this.talent, (ds) => ds.original).join('') : ''
