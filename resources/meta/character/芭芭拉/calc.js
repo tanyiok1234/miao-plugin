@@ -16,7 +16,6 @@ export const details = [{
 }]
 
 export const defDmgIdx = 1
-export const defDmgKey = 'qHeal'
 export const mainAttr = 'atk,hp,cpct,cdmg,mastery'
 
 export const buffs = [{
