@@ -118,6 +118,25 @@ export default class ProfileRank {
     return uids ? uids[0] : false
   }
 
+  static async getGroupMaxUidList (groupId, type = 'mark') {
+    let keys = await redis.keys(`miao:rank:${groupId}:${type}:*`)
+    let ret = []
+    for (let key of keys) {
+      let keyRet = /^miao:rank:\d+:(?:mark|dmg):(\d{8})$/.exec(key)
+      if (keyRet && keyRet[1]) {
+        let charId = keyRet[1]
+        let uid = await ProfileRank.getGroupMaxUid(groupId, charId, type)
+        if (uid) {
+          ret.push({
+            uid,
+            charId
+          })
+        }
+      }
+    }
+    return ret
+  }
+
   /**
    * 获取排行榜
    * @param groupId
@@ -209,12 +228,17 @@ export default class ProfileRank {
       delete data.isSelfUid
       data.uidType = 'ck'
     }
+
     if (uidType === 'ck') {
-      data.qq = qq || data.qq || ''
       data.uidType = 'ck'
+      data.qq = qq || data.qq || ''
     } else {
-      data.qq = data.qq || qq || ''
       data.uidType = data.uidType || 'bind'
+      if (data.uidType === 'bind') {
+        data.qq = data.qq || qq || ''
+      } else {
+        data.qq = qq || data.qq || ''
+      }
     }
     await redis.set(`miao:rank:uid-info:${uid}`, JSON.stringify(data), { EX: 3600 * 24 * 365 })
   }
