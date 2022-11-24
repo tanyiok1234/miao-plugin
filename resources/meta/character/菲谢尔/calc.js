@@ -3,10 +3,10 @@ export const details = [{
   dmg: ({ talent }, dmg) => dmg(talent.e['奥兹攻击伤害'], 'e')
 }, {
   title: '奥兹攻击激化伤害',
-  dmg: ({ talent }, dmg) => dmg(talent.e['奥兹攻击伤害'], 'e', 'aggravate')
+  dmg: ({ talent }, dmg) => dmg(talent.e['奥兹攻击伤害'], 'e', '超激化')
 },{
   title: '断罪雷影激化伤害',
-  dmg: ({ talent }, dmg) => dmg(talent.e['断罪雷影伤害'], 'e', 'aggravate')
+  dmg: ({ talent }, dmg) => dmg(talent.e['断罪雷影伤害'], 'e', '超激化')
 },{
   title: '奥兹召唤伤害',
   params: { e: true },

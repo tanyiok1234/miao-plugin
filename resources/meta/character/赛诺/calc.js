@@ -13,7 +13,7 @@ export const details = [{
 {
   title: 'Q状态普攻激化首段',
   params: { q: 1 },
-  dmg: ({ talent }, dmg) => dmg(talent.q['一段伤害'], 'a', 'aggravate')
+  dmg: ({ talent }, dmg) => dmg(talent.q['一段伤害'], 'a', '超激化')
 },{
   title: 'Q状态 E伤害',
   params: { q: 2 },
@@ -21,7 +21,7 @@ export const details = [{
 }, {
   title: 'Q状态 E激化伤害',
   params: { q: 2 },
-  dmg: ({ talent }, dmg) => dmg(talent.e['冥祭伤害'], 'e', 'aggravate')
+  dmg: ({ talent }, dmg) => dmg(talent.e['冥祭伤害'], 'e', '超激化')
 },{
   title: 'Q+末途真眼 E伤害',
   params: { q: 3 },
@@ -30,7 +30,7 @@ export const details = [{
 {
   title: 'Q+末途真眼 E激化伤害',
   params: { q: 3 },
-  dmg: ({ talent }, dmg) => dmg(talent.e['冥祭伤害'], 'e', 'aggravate')
+  dmg: ({ talent }, dmg) => dmg(talent.e['冥祭伤害'], 'e', '超激化')
 },{
   title: 'Q+末途真眼 渡荒之雷',
   params: { q: 4 },
@@ -41,8 +41,9 @@ export const details = [{
   dmg: ({ talent }, dmg) => dmg(100, 'e', 'aggravate')
 }]
 
-export const defDmgIdx = 2
+export const defDmgIdx = 3
 export const mainAttr = 'atk,cpct,cdmg,mastery'
+export const defParams = { q: 3 }
 
 export const buffs = [{
   title: '赛诺Q：Q状态下提升元素精通100点',
@@ -65,8 +66,8 @@ export const buffs = [{
   title: '赛诺被动：基于元素精通提升普攻[_aPlus]点伤害值，渡荒之雷提升[_ePlus]伤害值',
   data: {
     aPlus: ({ attr, calc, params }) => params.q === 1 ? calc(attr.mastery) * 1.5 : 0,
-    _aPlus: ({ attr, calc, params }) => params.q === 1 ? calc(attr.mastery) * 1.5 : 0,
+    _aPlus: ({ attr, calc, params }) => calc(attr.mastery) * 1.5,
     ePlus: ({ attr, calc, params }) => params.q === 4 ? calc(attr.mastery) / 2.5 : 0,
-    _ePlus: ({ attr, calc, params }) => params.q === 4 ? calc(attr.mastery) / 2.5 : 0
+    _ePlus: ({ attr, calc, params }) => calc(attr.mastery) / 2.5
   }
-}]
+}/*, 'aggravate'*/]
