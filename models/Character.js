@@ -6,7 +6,7 @@
 * */
 import lodash from 'lodash'
 import Base from './Base.js'
-import { Data } from '../components/index.js'
+import { Data, Format } from '../components/index.js'
 import CharImg from './character-lib/CharImg.js'
 import CharTalent from './character-lib/CharTalent.js'
 import CharId from './character-lib/CharId.js'
@@ -33,7 +33,7 @@ class Character extends Base {
     if (!this.isCustom) {
       let meta = getMeta(name)
       this.meta = meta
-      this.elem = CharId.getElem(elem || meta.elem) || 'anemo'
+      this.elem = Format.elem(elem || meta.elem, 'anemo')
     } else {
       this.meta = {}
     }
@@ -80,8 +80,12 @@ class Character extends Base {
     return CharId.isTraveler(this.id)
   }
 
-  // 获取武器类型
   get weaponType () {
+    return this.weapon
+  }
+
+  // 获取武器类型
+  get weaponTypeName () {
     const map = {
       sword: '单手剑',
       catalyst: '法器',
@@ -89,13 +93,13 @@ class Character extends Base {
       claymore: '双手剑',
       polearm: '长柄武器'
     }
-    let weaponType = this.weapon || ''
+    let weaponType = this.weaponType || ''
     return map[weaponType.toLowerCase()] || ''
   }
 
   // 获取元素名称
   get elemName () {
-    return CharId.getElemName(this.elem)
+    return Format.elemName(this.elem)
   }
 
   // 获取角色描述
@@ -165,7 +169,7 @@ class Character extends Base {
     return CharImg.getCardImg(this.name, se, def)
   }
 
-  getAvatarTalent (talent = {}, cons = 0, mode = 'level') {
+  getAvatarTalent (talent = {}, cons = 0, mode = 'original') {
     return CharTalent.getAvatarTalent(this.id, talent, cons, mode, this.talentCons)
   }
 
@@ -316,19 +320,18 @@ class Character extends Base {
   }
 
   // 获取伤害计算配置
-  async getCalcRule () {
+  getCalcRule () {
     if (!this._calcRule && this._calcRule !== false) {
-      this._calcRule = await CharCfg.getCalcRule(this)
+      this._calcRule = CharCfg.getCalcRule(this)
     }
     return this._calcRule
   }
 
-  static matchElem (str, def) {
-    return CharId.matchElem(str, def)
-  }
-
-  static matchElemName () {
-
+  getArtisCfg () {
+    if (!this._artisRule && this._artisRule !== false) {
+      this._artisRule = CharCfg.getArtisCfg(this)
+    }
+    return this._artisRule
   }
 }
 

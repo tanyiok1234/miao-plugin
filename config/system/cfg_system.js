@@ -101,6 +101,19 @@ export const cfgSchema = {
         def: false,
         oldCfgKey: 'sys.help',
         desc: '开启后将使用喵喵版帮助作为Yunzai的默认帮助，默认关闭'
+      },
+      commaGroup: {
+        title: '数字逗号分组',
+        key: '逗号',
+        def: 3,
+        type: 'num',
+        desc: '根据语言习惯设置数字分组，如千位组设为3，万位组设为4'
+      },
+      attrCalc: {
+        title: '面板计算属性',
+        key: '计算',
+        def: false,
+        desc: '使用基于武器&圣遗物计算的面板属性取代服务读取的面板数据，可规避双水buff等导致的一些面板数据错误。开启后部分角色属性可能会轻微变化，请根据需求开启关闭'
       }
     }
   }

@@ -6,7 +6,7 @@ import Base from './Base.js'
 import { Artifact, ArtifactSet, Character } from './index.js'
 import { Format, Data } from '../components/index.js'
 import ArtisMark from './profile-lib/ArtisMark.js'
-import { attrMap, attrValue } from '../resources/meta/artifact/artis-mark.js'
+import { attrMap, attrValue } from '../resources/meta/artifact/index.js'
 import CharArtis from './profile-lib/CharArtis.js'
 
 export default class ProfileArtis extends Base {
@@ -19,7 +19,9 @@ export default class ProfileArtis extends Base {
 
   setProfile (profile, artis) {
     this.profile = profile
-    this.setArtisSet(artis)
+    if (artis) {
+      this.setArtisSet(artis)
+    }
   }
 
   setArtisSet (ds) {
@@ -75,6 +77,10 @@ export default class ProfileArtis extends Base {
     return this.getSetData().names || []
   }
 
+  get hasArtis () {
+    return !lodash.isEmpty(this.artis)
+  }
+
   mainAttr (idx = '') {
     if (!idx) {
       let ret = {}
@@ -87,7 +93,7 @@ export default class ProfileArtis extends Base {
     if (!main) {
       return ''
     }
-    return ArtisMark.getKeyByTitle(main.key, true) || ''
+    return main.key || ''
   }
 
   is (check, pos = '') {
@@ -109,7 +115,8 @@ export default class ProfileArtis extends Base {
     let mainAttr = this.mainAttr()
     let check = true
     Data.eachStr(pos.toString(), (p) => {
-      if (!attr.split(',').includes(mainAttr[p])) {
+      let attrs = attr.split(',')
+      if (!attrs.includes(mainAttr[p]) && (p === '4' && !attrs.includes('dmg') && Format.isElem(mainAttr[p]))) {
         check = false
         return false
       }
