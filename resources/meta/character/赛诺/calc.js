@@ -13,7 +13,7 @@ export const details = [{
 {
   title: 'Q状态普攻激化首段',
   params: { q: 1 },
-  dmg: ({ talent }, dmg) => dmg(talent.q['一段伤害'], 'a', '超激化')
+  dmg: ({ talent }, dmg) => dmg(talent.q['一段伤害'], 'a', 'aggravate')
 },{
   title: 'Q状态 E伤害',
   params: { q: 2 },
@@ -21,7 +21,7 @@ export const details = [{
 }, {
   title: 'Q状态 E激化伤害',
   params: { q: 2 },
-  dmg: ({ talent }, dmg) => dmg(talent.e['冥祭伤害'], 'e', '超激化')
+  dmg: ({ talent }, dmg) => dmg(talent.e['冥祭伤害'], 'e', 'aggravate')
 },{
   title: 'Q+末途真眼 E伤害',
   params: { q: 3 },
@@ -30,7 +30,7 @@ export const details = [{
 {
   title: 'Q+末途真眼 E激化伤害',
   params: { q: 3 },
-  dmg: ({ talent }, dmg) => dmg(talent.e['冥祭伤害'], 'e', '超激化')
+  dmg: ({ talent }, dmg) => dmg(talent.e['冥祭伤害'], 'e', 'aggravate')
 },{
   title: 'Q+末途真眼 渡荒之雷',
   params: { q: 4 },
