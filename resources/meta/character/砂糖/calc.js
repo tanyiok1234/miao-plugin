@@ -16,6 +16,7 @@ export const details = [{
   dmg: ({}, { reaction }) => reaction('swirl')
 }]
 
+export const defDmgIdx = 3
 export const mainAttr = 'atk,cpct,cdmg,mastery'
 
 export const buffs = [{
