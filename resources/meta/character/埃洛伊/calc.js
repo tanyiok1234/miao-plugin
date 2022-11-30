@@ -12,6 +12,7 @@ export const details = [{
   dmg: ({ talent }, dmg) => dmg(talent.q['技能伤害'], 'q')
 }]
 
+export const defDmgIdx = 3
 export const buffs = [{
   title: '埃洛伊天赋：冰驰状态提高普攻伤害',
   data: {

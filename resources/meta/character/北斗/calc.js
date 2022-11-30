@@ -10,6 +10,7 @@ export const details = [{
   dmg: ({ talent }, dmg) => dmg(talent.q['闪雷伤害'], 'q')
 }]
 
+export const defDmgIdx = 2
 export const mainAttr = 'atk,cpct,cdmg'
 
 export const buffs = [{
