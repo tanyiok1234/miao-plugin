@@ -9,6 +9,7 @@ export const details = [{
   dmg: ({ talent }, dmg) => dmg(talent.q['冰枪持续伤害'], 'q')
 }]
 
+export const defDmgIdx = 1
 export const mainAttr = 'atk,cpct,cdmg'
 
 export const buffs = [{
