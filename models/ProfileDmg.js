@@ -6,6 +6,7 @@ import { attrMap } from '../resources/meta/artifact/index.js'
 import DmgBuffs from './profile-lib/DmgBuffs.js'
 import DmgAttr from './profile-lib/DmgAttr.js'
 import DmgCalc from './profile-lib/DmgCalc.js'
+import { Common } from '../components/index.js'
 
 export default class ProfileDmg extends Base {
   constructor (profile = {}) {
@@ -19,7 +20,11 @@ export default class ProfileDmg extends Base {
 
   static dmgRulePath (name) {
     const _path = process.cwd()
-    let path = `${_path}/plugins/miao-plugin/resources/meta/character/${name}/calc.js`
+    let path = `${_path}/plugins/miao-plugin/resources/meta/character/${name}/calc_auto.js`
+    if (fs.existsSync(path)&&Common.cfg('teamCalc')) {
+      return path
+    }
+    path = `${_path}/plugins/miao-plugin/resources/meta/character/${name}/calc.js`
     if (fs.existsSync(path)) {
       return path
     }
@@ -34,7 +39,7 @@ export default class ProfileDmg extends Base {
     let talentData = profile.talent || {}
     let detail = char.detail
     lodash.forEach(['a', 'e', 'q'], (key) => {
-      let level = lodash.isNumber(talentData[key]) ? talentData[key] : (talentData[key].level || 1)
+      let level = lodash.isNumber(talentData[key]) ? talentData[key] : (talentData[key]?.level || 1)
       let map = {}
       if (detail.talentData) {
         lodash.forEach(char.detail.talentData[key], (ds, key) => {
