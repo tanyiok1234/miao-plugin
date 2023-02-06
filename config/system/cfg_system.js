@@ -35,6 +35,22 @@ export const cfgSchema = {
         type: 'num',
         desc: '参与排名的限制条件：1:无限制 2:有CK 3:有16个角色或有CK 4:有御三家(安柏&凯亚&丽莎)或有CK 5:有16个角色+御三家或有CK。 若改变设置请根据情况决定是否需要【#重置排名】'
       },
+      rankNumber: {
+        title: '排名人数',
+        key: '排名人数',
+        type: 'num',
+        def: 15,
+        input: (n) => Math.min(30, Math.max(5, (n * 1 || 15))),
+        desc: '可选值5~30，建议15。设置高排名人数会提高图片的长度，图片较大可能会影响渲染与发送速度'
+      },
+      artisNumber: {
+        title: '圣遗物列表数量',
+        key: '圣遗物数量',
+        type: 'num',
+        def: 28,
+        input: (n) => Math.min(100, Math.max(4, (n * 1 || 28))),
+        desc: '可选值4~100，建议28，最终圣遗物数量取决于面板内圣遗物数量。设置高圣遗物数量会提高图片的长度，图片较大可能会影响渲染与发送速度'
+      },
       uploadAbyssData: {
         title: '上传深渊',
         key: '深渊',
