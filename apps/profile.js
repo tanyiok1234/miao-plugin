@@ -1,14 +1,14 @@
-import { Common, App, Data } from '../components/index.js'
+import { Common, App, Data, Cfg } from '../components/index.js'
 import { Character } from '../models/index.js'
-import { getTargetUid, getProfile, profileHelp } from './character/ProfileCommon.js'
-import { profileArtis, profileArtisList } from './character/ProfileArtis.js'
-import { renderProfile } from './character/ProfileDetail.js'
-import { profileStat } from './character/ProfileStat.js'
-import { profileList } from './character/ProfileList.js'
+import { getTargetUid, getProfile, profileHelp } from './profile/ProfileCommon.js'
+import { profileArtis, profileArtisList } from './profile/ProfileArtis.js'
+import { renderProfile } from './profile/ProfileDetail.js'
+import { profileStat } from './profile/ProfileStat.js'
+import { profileList } from './profile/ProfileList.js'
 import { uploadCharacterImg, delProfileImg, profileImgList } from './character/ImgUpload.js'
-import { enemyLv } from './character/ProfileUtils.js'
+import { enemyLv } from './profile/ProfileUtils.js'
 import ProfileChange from './profile/ProfileChange.js'
-import { groupRank, resetRank, refreshRank } from './character/ProfileRank.js'
+import { groupRank, resetRank, refreshRank, manageRank } from './profile/ProfileRank.js'
 
 let app = App.init({
   id: 'profile',
@@ -38,6 +38,11 @@ app.reg('refresh-rank', refreshRank, {
   name: '重置排名'
 })
 
+app.reg('manage-rank', manageRank, {
+  rule: /^#(开启|打开|启用|关闭|禁用)(群内|群|全部)*(排名|排行)$/,
+  name: '打开关闭'
+})
+
 app.reg('rank-list', groupRank, {
   rule: /^#(群|群内)?.+(排名|排行)(榜)?$/,
   name: '面板排名榜'
@@ -55,7 +60,7 @@ app.reg('profile-list', profileList, {
 })
 
 app.reg('profile-stat', profileStat, {
-  rule: /^#面板练度统计$/,
+  rule: /^#(面板|喵喵|角色|武器|天赋|技能|圣遗物)?练度统计$/,
   name: '面板练度统计$'
 })
 
@@ -120,6 +125,10 @@ export async function profileDetail (e) {
   let changeMsg = msg
   let pc = ProfileChange.matchMsg(msg)
   if (pc && pc.char && pc.change) {
+    if (!Cfg.get('profileChange')) {
+      e.reply('面板替换功能已禁用...')
+      return true
+    }
     e.uid = pc.uid || e.runtime.uid
     profileChange = ProfileChange.getProfile(e.uid, pc.char, pc.change)
     if (profileChange && profileChange.char) {
@@ -178,9 +187,14 @@ export async function profileDetail (e) {
     e.reply('自定义角色暂不支持此功能')
     return true
   }
-  if (!char.isRelease && !profileChange) {
-    e.reply('角色尚未实装')
-    return true
+  if (!char.isRelease) {
+    if (!profileChange) {
+      e.reply('角色尚未实装')
+      return true
+    } else if (Cfg.get('notReleasedData') === false) {
+      e.reply('未实装角色面板已禁用...')
+      return true
+    }
   }
 
   if (mode === 'profile' || mode === 'dmg') {
