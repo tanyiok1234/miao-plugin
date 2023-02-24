@@ -14,6 +14,7 @@ export const customCharacters = {
   // 已有角色添加别名示例：为魈增加新的别名
   // roleid请参见Yunzai config/genshin/roleId.js
   10000026: ['魈', '风夜叉'],
+  10000038: ['阿贝多', '阿老师'],
 
   // 自定义角色，角色id请以小写英文定义
   paimon: ['派蒙', '应急食物']
