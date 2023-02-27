@@ -1,4 +1,39 @@
 export const cfgSchema = {
+  apps: {
+    title: 'Yunzai功能（开启使用喵喵版功能）',
+    cfg: {
+      avatarList: {
+        title: '#角色 #UID',
+        key: '角色列表',
+        def: false
+      },
+      avatarCard: {
+        title: '#刻晴 #老婆',
+        key: '角色卡片',
+        def: true
+      },
+      uploadAbyssData: {
+        title: '#深渊',
+        key: '深渊',
+        def: false
+      },
+      profileStat: {
+        title: '#练度统计',
+        key: '练度统计',
+        def: false
+      },
+      help: {
+        title: '#帮助 #菜单',
+        key: '帮助',
+        def: false
+      },
+      avatarPoke: {
+        title: '戳一戳展示角色卡片',
+        key: '戳一戳',
+        def: true
+      }
+    }
+  },
   profile: {
     title: '角色面板相关设置',
     cfg: {
@@ -11,12 +46,6 @@ export const cfgSchema = {
         title: '面板替换',
         key: '面板替换',
         def: true
-      },
-      profileStat: {
-        title: '面板练度统计',
-        key: '练度统计',
-        def: false,
-        desc: '使用【#面板练度统计】功能取代【#练度统计】功能，默认关闭'
       },
       groupRank: {
         title: '群面板排名',
@@ -39,13 +68,19 @@ export const cfgSchema = {
         input: (n) => Math.min(30, Math.max(5, (n * 1 || 15))),
         desc: '可选值5~30，建议15。设置高排名人数会提高图片的长度，图片较大可能会影响渲染与发送速度'
       },
-      profileServ: {
+      profileServer: {
         title: '面板服务',
         key: '面板服务',
         type: 'num',
-        def: 1,
-        input: (n) => n * 1 === 1 ? 1 : 2,
-        desc: '面板服务优先选择：1：自动（具备有效Token时优先喵喵Api，否则Enka），2：Enka服务优先'
+        def: 0,
+        input: (n) => /[0-3]{1,3}/.test(n) ? n : 0,
+        desc: '面板服务选择：0:自动，1:喵Api(需具备Token)， 2:Enka-API， 3:MiniGG-Api。如设置三位数字则为分服务器设置，按顺序分别为 国服/B服/外服，例如112代表国服B服Miao,国外Enka'
+      },
+      costumeSplash: {
+        title: '使用自定义面板插图',
+        key: '面板图',
+        def: true,
+        desc: '开启彩蛋图（三皇冠/ACE/满命）及自定义面板图，关闭使用官方立绘'
       },
       teamCalc: {
         title: '组队加成伤害',
@@ -60,34 +95,6 @@ export const cfgSchema = {
         def: 28,
         input: (n) => Math.min(100, Math.max(4, (n * 1 || 28))),
         desc: '可选值4~100，建议28，最终圣遗物数量取决于面板内圣遗物数量。设置高圣遗物数量会提高图片的长度，图片较大可能会影响渲染与发送速度'
-      }
-    }
-  },
-  char: {
-    title: '玩家&老婆卡片展示',
-    cfg: {
-      avatarCard: {
-        title: '角色查询',
-        key: '角色',
-        def: true,
-        desc: '使用喵喵版角色卡片作为默认角色卡片功能',
-        showDesc: false
-      },
-      uploadAbyssData: {
-        title: '上传深渊',
-        key: '深渊',
-        def: false,
-        desc: '使用【#上传深渊】功能取代【#深渊】功能,默认关闭'
-      },
-      avatarWife: {
-        title: '老婆查询',
-        key: '老婆',
-        def: true
-      },
-      avatarPoke: {
-        title: '戳一戳卡片',
-        key: '戳一戳',
-        def: true
       }
     }
   },
@@ -118,6 +125,11 @@ export const cfgSchema = {
         key: '图片',
         def: true
       },
+      qFace: {
+        title: 'Q版角色头像',
+        key: '卡通头像',
+        def: true
+      },
       charPicSe: {
         title: '小清新角色图',
         key: '小清新',
@@ -137,11 +149,13 @@ export const cfgSchema = {
         input: (n) => Math.min(200, Math.max(50, (n * 1 || 100))),
         desc: '可选值50~200，建议100。设置高精度会提高图片的精细度，但因图片较大可能会影响渲染与发送速度'
       },
-      help: {
-        title: '喵喵作为默认帮助',
-        key: '帮助',
-        def: false,
-        desc: '开启后将使用喵喵版帮助作为Yunzai的默认帮助，默认关闭'
+      originalPic: {
+        title: '原图',
+        key: '原图',
+        type: 'num',
+        def: 3,
+        input: (n) => Math.min(3, Math.max(n * 1 || 0, 0)),
+        desc: '允许获取原图，0:不允许, 1:仅允许角色图, 2:仅允许面板图, 3:开启'
       },
       commaGroup: {
         title: '数字逗号分组',
