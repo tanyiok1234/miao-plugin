@@ -3,9 +3,9 @@ import lodash from 'lodash'
 import Base from './Base.js'
 import { Character } from './index.js'
 import { attrMap } from '../resources/meta/artifact/index.js'
-import DmgBuffs from './profile-lib/DmgBuffs.js'
-import DmgAttr from './profile-lib/DmgAttr.js'
-import DmgCalc from './profile-lib/DmgCalc.js'
+import DmgBuffs from './profile/DmgBuffs.js'
+import DmgAttr from './profile/DmgAttr.js'
+import DmgCalc from './profile/DmgCalc.js'
 import { Common } from '../components/index.js'
 
 export default class ProfileDmg extends Base {
@@ -21,7 +21,7 @@ export default class ProfileDmg extends Base {
   static dmgRulePath (name) {
     const _path = process.cwd()
     let path = `${_path}/plugins/miao-plugin/resources/meta/character/${name}/calc_auto.js`
-    if (fs.existsSync(path)&&Common.cfg('teamCalc')) {
+    if (fs.existsSync(path) && Common.cfg('teamCalc')) {
       return path
     }
     path = `${_path}/plugins/miao-plugin/resources/meta/character/${name}/calc.js`
@@ -156,7 +156,7 @@ export default class ProfileDmg extends Base {
         let ds = lodash.merge({ talent }, DmgAttr.getDs(attr, meta))
         detail = detail({ ...ds, attr, profile })
       }
-      let params = lodash.merge({}, defParams, detail.params || {})
+      let params = lodash.merge({}, defParams, detail?.params || {})
       let { attr } = DmgAttr.calcAttr({ originalAttr, buffs, meta, params, talent: detail.talent || '' })
       if (detail.isStatic) {
         return
@@ -193,10 +193,15 @@ export default class ProfileDmg extends Base {
         detail = detailMap[0]
       }
 
+      if (lodash.isFunction(detail)) {
+        let { attr } = DmgAttr.calcAttr({ originalAttr, buffs, meta })
+        let ds = lodash.merge({ talent }, DmgAttr.getDs(attr, meta))
+        detail = detail({ ...ds, attr, profile })
+      }
       dmgDetail = {
         title: detail.title,
-        userIdx: detail.userIdx,
-        basicRet: lodash.merge({}, ret[detail.userIdx]),
+        userIdx: detail.userIdx || defDmgIdx,
+        basicRet: lodash.merge({}, ret[detail.userIdx] || ret[defDmgIdx]),
         attr: []
       }
 
@@ -243,7 +248,8 @@ export default class ProfileDmg extends Base {
       msg,
       dmgRet,
       enemyName,
-      dmgCfg: dmgDetail
+      dmgCfg: dmgDetail,
+      enemyLv
     }
   }
 }
