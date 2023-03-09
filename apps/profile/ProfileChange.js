@@ -2,8 +2,8 @@
  * 面板数据替换相关逻辑
  */
 import lodash from 'lodash'
-import { Data } from '../../components/index.js'
-import { Character, ProfileData, Weapon, Player } from '../../models/index.js'
+import { Data } from '#miao'
+import { Character, ProfileData, Weapon, Player } from '#miao.models'
 
 const keyMap = {
   artis: '圣遗物',
@@ -78,7 +78,7 @@ const ProfileChange = {
               type
             }
           })
-        } else if (keyRet[4] !== '武器') {
+        } else if (keyRet[4] !== '武器' && keyRet[4] !== '花') {
           return true
         }
       }

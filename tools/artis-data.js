@@ -1,9 +1,12 @@
 import fs from 'fs'
 import cheerio from 'cheerio'
 import fetch from 'node-fetch'
-import { Data } from '../components/index.js'
+import { Data } from '#miao'
 import lodash from 'lodash'
 import request from 'request'
+import HttpsProxyAgent from 'https-proxy-agent'
+
+let agent = new HttpsProxyAgent('http://localhost:4780')
 
 const artiIdx = {
   Flower: 1,
@@ -15,7 +18,7 @@ const artiIdx = {
 
 async function getSets (id) {
   const url = `https://genshin.honeyhunterworld.com/i_${id}/?lang=CHS`
-  let req = await fetch(url)
+  let req = await fetch(url, { agent })
   let txt = await req.text()
   let sTxt = /sortable_data.push\((.*)\)/.exec(txt)
   let ret = {}
@@ -41,7 +44,7 @@ async function getSets (id) {
 
 async function down (sets = '') {
   const url = 'https://genshin.honeyhunterworld.com/fam_art_set/?lang=CHS'
-  let req = await fetch(url)
+  let req = await fetch(url, { agent })
   let txt = await req.text()
   if (sets) {
     sets = sets.split(',')
@@ -52,7 +55,14 @@ async function down (sets = '') {
   let sTxt = /sortable_data.push\((.*)\)/.exec(txt)
   if (sTxt && sTxt[1]) {
     // eslint-disable-next-line no-eval
-    let tmp = eval(sTxt[1])
+    let txt = sTxt[1]
+    txt = txt.replace(/<script>.+<\/script>/g, '')
+    let tmp
+    try {
+      tmp = eval(txt)
+    } catch (e) {
+    }
+
     lodash.forEach(tmp, (ds) => {
       let na = cheerio.load(ds[0])('a:last')
       let idRet = /i_(\w+)\//.exec(na.attr('href'))
@@ -86,7 +96,7 @@ async function down (sets = '') {
     }
     ds.sets = await getSets(ds.id)
     console.log(`arti ${ds.id}:${ds.name} Done`)
-    Data.createDir(`resources/meta/artifact/imgs/${ds.name}`)
+    Data.createDir(`resources/meta/artifact/imgs/${ds.name}`, 'miao')
 
     lodash.forEach(ds.sets, (s, idx) => {
       imgs.push({
@@ -95,8 +105,8 @@ async function down (sets = '') {
       })
     })
   }
-  Data.createDir('resources/meta/artifact')
-  Data.writeJSON('resources/meta/artifact/data.json', ret)
+  Data.createDir('resources/meta/artifact', 'miao')
+  Data.writeJSON('resources/meta/artifact/data.json', ret, 'miao')
 
   const _path = process.cwd()
   const _root = _path + '/plugins/miao-plugin/'

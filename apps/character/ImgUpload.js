@@ -5,8 +5,8 @@ import { segment } from 'oicq'
 import MD5 from 'md5'
 import fetch from 'node-fetch'
 import lodash from 'lodash'
-import { Cfg, Data } from '../../components/index.js'
-import { Character } from '../../models/index.js'
+import { Cfg, Data } from '#miao'
+import { Character } from '#miao.models'
 
 const resPath = process.cwd() + '/plugins/miao-plugin/resources/'
 let regex = /^#?\s*(?:喵喵)?(?:上传|添加)(.+)(?:照片|写真|图片|图像)\s*$/
@@ -53,8 +53,14 @@ export async function uploadCharacterImg (e) {
       for (let val of source.message) {
         if (val.type === 'image') {
           imageMessages.push(val)
-        } else if (val.type === 'xml') { // 支持合并转发消息内置的图片批量上传，喵喵 喵喵喵？ 喵喵喵喵
-          let resid = val.data.match(/m_resid="(\d|\w|\/|\+)*"/)[0].replace(/m_resid=|"/g, '')
+        } else if (val.type === 'xml' || val.type === 'forward') {// 支持合并转发消息内置的图片批量上传，喵喵 喵喵喵？ 喵喵喵喵
+          let resid
+            try {
+              resid = val.data.match(/m_resid="(\d|\w|\/|\+)*"/)[0].replace(/m_resid=|"/g, '')
+            } catch (err) {
+              console.log('Miao合并上传：转换id获取')
+              resid = val.id
+            }
           if (!resid) break
           let message = await Bot.getForwardMsg(resid)
           for (const item of message) {
@@ -202,6 +208,7 @@ export async function profileImgList (e) {
   }
   if ([1, 0].includes(Cfg.get('originalPic') * 1)) {
     e.reply('已禁止获取面板图列表')
+    return true
   }
   let nickname = Bot.nickname
   if (e.isGroup) {
