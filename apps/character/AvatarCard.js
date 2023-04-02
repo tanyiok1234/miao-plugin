@@ -1,7 +1,6 @@
 import { Character, MysApi, Player } from '#miao.models'
 import { Cfg, Common } from '#miao'
 import lodash from 'lodash'
-import { segment } from 'oicq'
 import moment from 'moment'
 
 let Avatar = {
@@ -43,7 +42,7 @@ let Avatar = {
     }
     let bg = char.getCardImg(Cfg.get('charPicSe', false))
     if (renderType === 'photo') {
-      e.reply(segment.image(process.cwd() + '/plugins/miao-plugin/resources/' + bg.img))
+      e.reply(segment.image(`file://${process.cwd()}/plugins/miao-plugin/resources/${bg.img}`))
       return true
     }
     let uid = e.uid || (e.targetUser && e.targetUser.uid)

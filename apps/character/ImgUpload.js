@@ -1,7 +1,6 @@
 import fs from 'fs'
 import { promisify } from 'util'
 import { pipeline } from 'stream'
-import { segment } from 'oicq'
 import MD5 from 'md5'
 import fetch from 'node-fetch'
 import lodash from 'lodash'
@@ -25,6 +24,8 @@ export async function uploadCharacterImg (e) {
   if (msg.includes('面板')) {
     isProfile = true
     regRet = profileRegex.exec(msg)
+  } else {
+    isProfile = false
   }
 
   // 通过解析正则获取消息中的角色名
@@ -89,7 +90,7 @@ async function saveImages (e, name, imageMessages) {
   let path = resPath + pathSuffix
 
   if (!fs.existsSync(path)) {
-    Data.createDir(pathSuffix, resPath)
+    Data.createDir("resources/" + pathSuffix, 'miao')
   }
   let senderName = lodash.truncate(e.sender.card, { length: 8 })
   let imgCount = 0
@@ -133,7 +134,7 @@ async function saveImages (e, name, imageMessages) {
     imgCount++
     Bot.logger.mark(`添加成功: ${path}/${fileName}`)
   }
-  e.reply([segment.at(e.user_id, senderName), `\n成功添加${imgCount}张${name}图片。`])
+  e.reply([segment.at(e.user_id, senderName), `\n成功添加${imgCount}张${name}${isProfile ? '面板图' : '图片'}。`])
   return true
 }
 
@@ -235,7 +236,7 @@ export async function profileImgList (e) {
       // 合并转发最多99？ 但是我感觉不会有这么多先不做处理
       console.log(`${path}${imgs[i]}`)
       msglist.push({
-        message: [`${i + 1}.`, segment.image(`${path}/${imgs[i]}`)],
+        message: [`${i + 1}.`, segment.image(`file://${path}/${imgs[i]}`)],
         nickname: nickname,
         user_id: Bot.uin
       })

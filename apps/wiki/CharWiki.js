@@ -1,5 +1,4 @@
 import lodash from 'lodash'
-import { segment } from 'oicq'
 import CharTalent from './CharTalent.js'
 import CharWikiData from './CharWikiData.js'
 import CharMaterial from './CharMaterial.js'
@@ -38,7 +37,7 @@ const CharWiki = {
       return false
     }
     let char = Character.get(ret[1])
-    if (!char) {
+    if (!char || (char.isCustom && mode !== 'pic')) {
       return false
     }
     e.wikiMode = mode
@@ -54,7 +53,7 @@ const CharWiki = {
     if (mode === 'pic') {
       let img = char.getCardImg(Cfg.get('charPicSe', false), false)
       if (img && img.img) {
-        e.reply(segment.image(process.cwd() + '/plugins/miao-plugin/resources/' + img.img))
+        e.reply(segment.image(`file://${process.cwd()}/plugins/miao-plugin/resources/${img.img}`))
       } else {
         e.reply('暂无图片')
       }

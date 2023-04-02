@@ -1,4 +1,3 @@
-import { segment } from 'oicq'
 import { Cfg } from '#miao'
 import { MysApi } from '#miao.models'
 
@@ -34,16 +33,18 @@ export async function getOriginalPicture (e) {
         }
       } catch (e) {
       }
-      if (imgPath.type === 'character' && [2, 0].includes(originalPic)) {
-        e.reply('已禁止获取角色原图...')
-        return true
-      }
-      if (imgPath.type === 'profile' && [1, 0].includes(originalPic)) {
-        e.reply('已禁止获取面板原图...')
-        return true
+      if (!e.isMaster) {
+        if (imgPath.type === 'character' && [2, 0].includes(originalPic)) {
+          e.reply('已禁止获取角色原图...')
+          return true
+        }
+        if (imgPath.type === 'profile' && [1, 0].includes(originalPic)) {
+          e.reply('已禁止获取面板原图...')
+          return true
+        }
       }
       if (imgPath && imgPath.img) {
-        e.reply([segment.image(process.cwd() + '/plugins/miao-plugin/resources/' + decodeURIComponent(imgPath.img))], false, { recallMsg: 30 })
+        e.reply(segment.image(`file://${process.cwd()}/plugins/miao-plugin/resources/${decodeURIComponent(imgPath.img)}`), false, { recallMsg: 30 })
       }
       return true
     }
@@ -51,7 +52,7 @@ export async function getOriginalPicture (e) {
       let time = new Date()
       // 对at错图像的增加嘲讽...
       if (time / 1000 - source.time < 3600) {
-        e.reply([segment.image(process.cwd() + '/plugins/miao-plugin/resources/common/face/what.jpg')])
+        e.reply(segment.image(`file://${process.cwd()}/plugins/miao-plugin/resources/common/face/what.jpg`))
         return true
       }
     }
