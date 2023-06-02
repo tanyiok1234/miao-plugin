@@ -6,12 +6,13 @@ import AvatarArtis from './AvatarArtis.js'
 import { Artifact, ArtifactSet, Character } from './index.js'
 import { Format } from '../components/index.js'
 import ArtisMark from './profile/ArtisMark.js'
-import { attrMap } from '../resources/meta/artifact/index.js'
+import { attrMap as attrMapGS } from '../resources/meta/artifact/index.js'
+import { attrMap as attrMapSR } from '../resources/meta-sr/artifact/index.js'
 import CharArtis from './profile/CharArtis.js'
 
 export default class ProfileArtis extends AvatarArtis {
-  constructor (charid = 0, elem = '') {
-    super(charid)
+  constructor (charid = 0, elem = '', game = 'gs') {
+    super(charid, game)
     this.elem = elem
   }
 
@@ -29,9 +30,11 @@ export default class ProfileArtis extends AvatarArtis {
    */
   getCharCfg () {
     let char = Character.get(this.charid)
+    let { game, isGs } = char
     let { attrWeight, title } = CharArtis.getCharArtisCfg(char, this.profile, this)
     let attrs = {}
     let baseAttr = char.baseAttr || { hp: 14000, atk: 230, def: 700 }
+    let attrMap = isGs ? attrMapGS : attrMapSR
     lodash.forEach(attrMap, (attr, key) => {
       let k = attr.base || ''
       let weight = attrWeight[k || key]
@@ -53,7 +56,7 @@ export default class ProfileArtis extends AvatarArtis {
       }
       attrs[key] = ret
     })
-    let posMaxMark = ArtisMark.getMaxMark(attrs)
+    let posMaxMark = ArtisMark.getMaxMark(attrs, game)
     // 返回内容待梳理简化
     return {
       attrs,
@@ -67,15 +70,16 @@ export default class ProfileArtis extends AvatarArtis {
     let artis = {}
     let setCount = {}
     let totalMark = 0
-    let totalCrit = 0
-    let totalVaild = 0
+    let self = this
     this.forEach((arti, idx) => {
-      let mark = ArtisMark.getMark(charCfg, idx, arti.main, arti.attrs, this.elem)
-      let crit = ArtisMark.getCritMark(charCfg, idx, arti.main, arti.attrs, this.elem)
-      let vaild = ArtisMark.getValidMark(charCfg, idx, arti.main, arti.attrs, this.elem)
+      let mark = ArtisMark.getMark({
+        charCfg,
+        idx,
+        arti,
+        elem: this.elem,
+        game: self.game
+      })
       totalMark += mark
-      totalCrit += crit
-      totalVaild += vaild
       setCount[arti.set] = (setCount[arti.set] || 0) + 1
       if (!withDetail) {
         artis[idx] = {
@@ -84,17 +88,18 @@ export default class ProfileArtis extends AvatarArtis {
           markClass: ArtisMark.getMarkClass(mark)
         }
       } else {
-        let artifact = Artifact.get(arti.name)
+        let artifact = Artifact.get(arti.name, this.game)
         artis[idx] = {
           name: artifact.name,
+          abbr: artifact.abbr,
           set: artifact.setName,
           img: artifact.img,
           level: arti.level,
           _mark: mark,
           mark: Format.comma(mark, 1),
           markClass: ArtisMark.getMarkClass(mark),
-          main: ArtisMark.formatArti(arti.main, charCfg.attrs, true, this.elem || ''),
-          attrs: ArtisMark.formatArti(arti.attrs, charCfg.attrs)
+          main: ArtisMark.formatArti(arti.main, charCfg.attrs, true, this.game),
+          attrs: ArtisMark.formatArti(arti.attrs, charCfg.attrs, false, this.game)
         }
       }
     })
@@ -114,10 +119,6 @@ export default class ProfileArtis extends AvatarArtis {
     let ret = {
       mark: Format.comma(totalMark, 1),
       _mark: totalMark,
-      crit: Format.comma(totalCrit, 1),
-      _crit: totalCrit,
-      valid: Format.comma(totalVaild, 1),
-      _valid: totalVaild,
       markClass: ArtisMark.getMarkClass(totalMark / 5),
       artis,
       sets,

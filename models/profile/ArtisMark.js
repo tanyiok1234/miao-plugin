@@ -1,47 +1,48 @@
 import lodash from 'lodash'
 import { Format } from '#miao'
-import { attrNameMap, mainAttr, subAttr, attrMap ,basicNum,attrPct} from '../../resources/meta/artifact/index.js'
+import {
+  attrNameMap,
+  mainAttr as mainAttrGS,
+  subAttr as subAttrGS,
+  attrMap as attrMapGS
+} from '../../resources/meta/artifact/index.js'
+import {
+  attrMap as attrMapSR,
+  mainAttr as mainAttrSR,
+  subAttr as subAttrSR
+} from '../../resources/meta-sr/artifact/meta.js'
 
 let ArtisMark = {
   // 根据Key获取标题
-  getKeyByTitle (title, dmg = false) {
+  getKeyByTitle (title, game = 'gs') {
     if (/元素伤害加成/.test(title) || Format.isElem(title)) {
       let elem = Format.matchElem(title)
-      return dmg ? 'dmg' : elem
+      return elem
     } else if (title === '物理伤害加成') {
       return 'phy'
     }
-    return attrNameMap[title]
+    return attrNameMap[title] || attrMapGS[title]
   },
 
-  // 根据标题获取Key
-  getTitleByKey (key) {
-    // 检查是否是伤害字段
-    let dmg = Format.elemName(key, '')
-    if (dmg) {
-      return `${dmg}伤加成`
-    }
-    return attrMap[key].title
-  },
-
-  getKeyTitleMap () {
+  getKeyTitleMap (game = 'gs') {
     let ret = {}
+    let attrMap = game === 'gs' ? attrMapGS : attrMapSR
     lodash.forEach(attrMap, (ds, key) => {
       ret[key] = ds.title
     })
     Format.eachElem((key, name) => {
       ret[key] = `${name}伤加成`
-    })
+    }, game)
     return ret
   },
 
-  formatAttr (ds) {
+  formatAttr (ds, game = 'gs') {
     if (!ds) {
       return {}
     }
     if (lodash.isArray(ds) && ds[0] && ds[1]) {
       return {
-        key: ArtisMark.getKeyByTitle(ds[0]),
+        key: ArtisMark.getKeyByTitle(ds[0], game),
         value: ds[1]
       }
     }
@@ -49,7 +50,7 @@ let ArtisMark = {
       return {}
     }
     return {
-      key: ds.key || ArtisMark.getKeyByTitle(ds.title || ds.name || ds.key || ds.id || ''),
+      key: ds.key || ArtisMark.getKeyByTitle(ds.title || ds.name || ds.key || ds.id || '', game),
       value: ds.value || ''
     }
   },
@@ -57,73 +58,40 @@ let ArtisMark = {
   /**
    * 格式化圣遗物词条
    * @param ds
-   * @param markCfg
+   * @param charAttrCfg
    * @param isMain
+   * @param game
    * @returns {{title: *, value: string}|*[]}
    */
-  formatArti (ds, charAttrCfg = false, isMain = false, elem = '') {
+  formatArti (ds, charAttrCfg = false, isMain = false, game = 'gs') {
     // 若为attr数组
     if (ds[0] && (ds[0].title || ds[0].key)) {
       let ret = []
-      let totalUpNum = 0
-      let ltArr = []
-      let isIdAttr = false
-
       lodash.forEach(ds, (d) => {
-        isIdAttr = !d.isCalcNum
-        let arti = ArtisMark.formatArti(d, charAttrCfg)
+        let arti = ArtisMark.formatArti(d, charAttrCfg, isMain, game)
         ret.push(arti)
-        if (isIdAttr) {
-          return true
-        }
-        totalUpNum += arti.upNum
-        if (arti.hasLt) {
-          ltArr.push(arti)
-        }
-        delete arti.hasLt
-        delete arti.hasGt
       })
-      if (!isIdAttr) {
-        ltArr = lodash.sortBy(ltArr, 'upNum').reverse()
-        for (let arti of ltArr) {
-          if (totalUpNum > 9) {
-            arti.upNum = arti.upNum - 1
-            totalUpNum--
-          } else {
-            break
-          }
-        }
-      }
       return ret
     }
 
     let key = ds.key
     let title = ds.title || ds[0]
     if (!key) {
-      key = ArtisMark.getKeyByTitle(title)
-    } else if (!title) {
-      title = ArtisMark.getTitleByKey(key)
+      key = ArtisMark.getKeyByTitle(title, game)
     }
     let isDmg = Format.isElem(key)
     let val = ds.value || ds[1]
-    let value = val
     let num = ds.value || ds[1]
     if (!key || key === 'undefined') {
       return {}
     }
-    let arrCfg = attrMap[isDmg ? 'dmg' : key]
-    val = Format[arrCfg.format](val, 1)
+    let arrCfg = (game === 'gs' ? attrMapGS : attrMapSR)[isDmg ? 'dmg' : key]
+    val = Format[arrCfg?.format || 'comma'](val, 1)
     let ret = {
       key,
       value: val,
-      upNum: ds.upNum || 0
-    }
-    if (!isMain && !ret.upNum) {
-      let incRet = ArtisMark.getIncNum(key, value)
-      ret.upNum = incRet.num
-      ret.hasGt = incRet.hasGt
-      ret.hasLt = incRet.hasLt
-      ret.isCalcNum = true
+      upNum: ds.upNum || 0,
+      eff: ds.eff || 0
     }
 
     if (charAttrCfg) {
@@ -135,27 +103,8 @@ let ArtisMark = {
       ret.mark = Format.comma(mark || 0)
       ret._mark = mark || 0
     }
+    ret.eff = ret.eff ? Format.comma(ret.eff / (game === 'gs' ? 0.85 : 0.9), 1) : '-'
     return ret
-  },
-
-  // 获取升级次数
-  getIncNum (key, value) {
-    let cfg = attrMap[key]
-    if (!value || !cfg || !cfg.value || !cfg.valueMin) {
-      return { num: 0 }
-    }
-    let maxNum = Math.min(5, Math.floor((value / cfg.valueMin).toFixed(1) * 1))
-    let minNum = Math.max(1, Math.ceil((value / cfg.value).toFixed(1) * 1))
-    // 相等时直接返回
-    if (maxNum === minNum) {
-      return { num: minNum }
-    }
-    let avg = Math.round(value / (cfg.value + cfg.valueMin) * 2)
-    return {
-      num: avg,
-      hasGt: maxNum > avg,
-      hasLt: minNum < avg
-    }
   },
 
   // 获取评分档位
@@ -170,90 +119,41 @@ let ArtisMark = {
   },
 
   // 获取位置分数
-  getMark (charCfg, posIdx, mainAttr, subAttr, elem = '') {
+  getMark ({ charCfg, idx, arti, elem = '', game = 'gs' }) {
     let ret = 0
+    let mAttr = arti.main
+    let sAttr = arti.attrs
     let { attrs, posMaxMark } = charCfg
-    let key = mainAttr?.key
+    let key = mAttr?.key
     if (!key) {
       return 0
     }
     let fixPct = 1
-    posIdx = posIdx * 1
-    if (posIdx >= 3) {
+    idx = idx * 1
+    if (idx >= 3) {
       let mainKey = key
       if (key !== 'recharge') {
-        if (posIdx === 4 && Format.isElem(key) && key === elem) {
+        let dmgIdx = { gs: 4, sr: 5 }
+        if (idx === dmgIdx[game] && Format.sameElem(elem, key, game)) {
           mainKey = 'dmg'
         }
-        fixPct = Math.max(0, Math.min(1, (attrs[mainKey]?.weight || 0) / (posMaxMark['m' + posIdx])))
+        fixPct = Math.max(0, Math.min(1, (attrs[mainKey]?.weight || 0) / (posMaxMark['m' + idx])))
       }
-      ret += (attrs[mainKey]?.mark || 0) * (mainAttr.value || 0) / 4
+      ret += (attrs[mainKey]?.mark || 0) * (mAttr.value || 0) / 4
     }
 
-    lodash.forEach(subAttr, (ds) => {
+    lodash.forEach(sAttr, (ds) => {
       ret += (attrs[ds.key]?.mark || 0) * (ds.value || 0)
     })
-    return ret * (1 + fixPct) / 2 / posMaxMark[posIdx] * 66
-  },
-    
-  getCritMark (charCfg, posIdx, mainAttr, subAttr, elem = '') {
-    let ret = 0
-    let { attrs, posMaxMark } = charCfg
-    let key = mainAttr?.key
-    if (!key) {
-      return 0
-    }
-    let fixPct = 1
-    posIdx = posIdx * 1
-    if (posIdx >= 4) {
-      let mainKey = key
-      if (posIdx === 4 && Format.isElem(key) && key === elem) {
-           mainKey = 'dmg'
-      }
-      fixPct = Math.max(0, Math.min(1, (attrs[mainKey]?.weight || 0) / (posMaxMark['m' + posIdx])))
-    }
-    if(key === 'cpct'|| key === 'cdmg' ){
-          ret += 9.41
-      }
-
-    lodash.forEach(subAttr, (ds) => {
-      if (ds.key === 'cpct' || ds.key === 'cdmg' ){
-          let temp_s = (attrs[ds.key]?.mark || 0) * (ds.value || 0)/85
-          ret += temp_s
-      }
-    })
-    return ret
-  },
-    
-  getValidMark (charCfg, posIdx, mainAttr, subAttr, elem = '') {
-    let ret = 0
-    let { attrs, posMaxMark } = charCfg
-    let key = mainAttr?.key
-    if (!key) {
-      return 0
-    }
-    let fixPct = 1
-    posIdx = posIdx * 1
-    if (posIdx >= 4) {
-      let mainKey = key
-      if (posIdx === 4 && Format.isElem(key) && key === elem) {
-           mainKey = 'dmg'
-      }
-      
-      
-      fixPct = Math.max(0, Math.min(1, (attrs[mainKey]?.weight || 0) / (posMaxMark['m' + posIdx])))
-    }
-    lodash.forEach(subAttr, (ds) => {
-      let temp_s = (attrs[ds.key]?.mark || 0) * (ds.value || 0)/85
-      ret += temp_s
-    })
-    return ret
+    return ret * (1 + fixPct) / 2 / posMaxMark[idx] * 66
   },
 
   // 获取位置最高分
-  getMaxMark (attrs) {
+  getMaxMark (attrs, game = 'gs') {
     let ret = {}
-    for (let idx = 1; idx <= 5; idx++) {
+    let mainAttr = game === 'gs' ? mainAttrGS : mainAttrSR
+    let subAttr = game === 'gs' ? subAttrGS : subAttrSR
+    for (let idx = 1; idx <= (game === 'gs' ? 5 : 6); idx++) {
       let totalMark = 0
       let mMark = 0
       let mAttr = ''
@@ -292,11 +192,12 @@ let ArtisMark = {
     return ret.slice(0, maxLen)
   },
 
-  hasAttr (artis) {
+  hasAttr (artis, game = 'gs') {
     for (let idx = 1; idx <= 5; idx++) {
       let ds = artis[idx]
       if (ds) {
-        if (!ds.name || !ds.main || !ds.attrs || !ds?.main?.key) {
+        // 不再支持非id格式的面板
+        if ((!ds.attrIds && !ds.attr) || !ds.mainId) {
           return false
         }
       }
