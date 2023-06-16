@@ -7,7 +7,7 @@ export const miaoApi = {
   listApi: ({ url, uid, diyCfg, game = 'gs' }) => {
     let qq = /\d{5,12}/.test(diyCfg.qq) ? diyCfg.qq : 'none'
     let token = diyCfg.token
-    url = url || 'http://49.232.91.210/'
+    url = url || 'http://miao.games/'
     return `${url}profile/data?uid=${uid}&qq=${qq}&token=${token}&version=2&game=${game}`
   }
 }
@@ -38,7 +38,7 @@ export const hutaoApi = {
 
 export const homoApi = {
   url: 'https://api.mihomo.me/sr_info',
-  userAgent: 'Miao-Plugin/3.1',
+  // userAgent: 'Miao-Plugin/3.1',
   listApi: ({ url, uid, diyCfg }) => {
     return `${url}/${uid}`
   }
