@@ -74,15 +74,16 @@ class App {
         check.push(app.check)
       }
 
-      cls.prototype[key] = async function () {
-        let e = this.e
+      cls.prototype[key] = async function (e) {
+        e = this.e || e
+        const self_id = e.self_id || e.bot?.uin || Bot.uin
         if (event === 'poke') {
           if (e.notice_type === 'group') {
-            if (e.target_id !== Bot.uin && !e.isPoke) {
+            if (e.target_id !== self_id && !e.isPoke) {
               return false
             }
             // group状态下，戳一戳的发起人是operator
-            if (e.user_id === Bot.uin) {
+            if (e.user_id === self_id) {
               e.user_id = e.operator_id
             }
           }
@@ -111,11 +112,11 @@ class App {
           reg: yzRule,
           fnc: yzKey
         })
-        cls.prototype[yzKey] = async function () {
+        cls.prototype[yzKey] = async function (e) {
           if (!Version.isMiao && !app.yzCheck()) {
             return false
           }
-          let e = this.e
+          e = this.e || e
           e.original_msg = e.original_msg || e.msg
           return await app.fn.call(this, e)
         }

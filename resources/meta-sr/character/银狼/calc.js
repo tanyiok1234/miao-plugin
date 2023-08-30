@@ -3,12 +3,19 @@ export const details = [{
   dmg: ({ talent }, dmg) => dmg(talent.a['技能伤害'], 'a')
 }, {
   title: '战技伤害',
-  dmg: ({ talent }, dmg) => dmg(talent.e['单体伤害'], 'e')
+  dmg: ({ talent }, dmg) => dmg(talent.e['技能伤害'], 'e')
 }, {
   title: '终结技伤害',
   dmg: ({ talent, cons }, dmg) => {
     let addDmg = (cons * 1 >= 4) ? 1 : 0
     return dmg(talent.q['技能伤害'] + addDmg, 'q')
+  }
+}, {
+  title: '对10韧性敌人量子击破纠缠伤害',
+  dmg: ({ calc, attr }, { reaction }) => {
+    return {
+      avg: reaction('entanglement').avg * 5 * (10 + 2) / 4
+    }
   }
 }]
 
@@ -22,7 +29,7 @@ export const buffs = [{
 }, {
   title: '银狼战技：添加弱点降低对方对应属性抗性[kx]%',
   data: {
-    kx: ({ talent }) => talent.e['伤害抗性降低'] * 100
+    kx: 20
   }
 }, {
   title: '银狼终结技：释放终结技降低敌方防御[enemyDef]%',
